@@ -53,7 +53,7 @@ public class FiltroAutenticacion implements Filter {
         resource = path.split("/")[2];
         boolean allowedPath = prop.containsKey(path);
         Cookie[] cookie = ((HttpServletRequest) request).getCookies();
-        
+        if(cookie != null){
         for (Cookie c : cookie) {
             if ("id_token".equals(c.getName())) {
                 jwt = c.getValue();
@@ -62,7 +62,7 @@ public class FiltroAutenticacion implements Filter {
                 usuario = c.getValue();
             }
         }
-               
+        }
         try { 
             
                if (usuario != null & jwt != null){
