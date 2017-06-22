@@ -76,7 +76,6 @@ public class AuthService {
     public UserDTO login(UserDTO user) throws UnirestException, JSONException, IOException, InterruptedException, ExecutionException {
         String str;
         Integer code = auth.managementUpdateClientGrants().getCode();
-        System.out.println(code);
         if (code == 200) {
             str = auth.getSubject(user, rsp);
             user.setRoles(CacheManager.getRolesByUserCache().get(str));

@@ -55,18 +55,16 @@ public class CacheManager {
                     @Override
                     public List<String> load(String userId) throws Exception {
                         return getAuthorization().getPermissionsPerRole(getAuthorization().getRolesIDPerUser(getAuthorization().authorizationGetUserRoles(userId)));
-
                     }
                 });
         rolesByUserCache = CacheBuilder.newBuilder()
                 .maximumSize(10000) // maximum 100 records can be cached
                 .expireAfterAccess(30, TimeUnit.MINUTES) // cache will expire after 30 minutes of access
                 .build(new CacheLoader<String, List<String>>() { // build the cacheloader
-
+                    
                     @Override
                     public List<String> load(String userId) throws Exception {
                         return getAuthorization().getRoles(new JSONArray(getAuthorization().authorizationGetUserRoles(userId).getBody()));
-
                     }
                 });
 
@@ -74,7 +72,6 @@ public class CacheManager {
                 .maximumSize(10000) // maximum 100 records can be cached
                 .expireAfterAccess(30, TimeUnit.MINUTES) // cache will expire after 30 minutes of access
                 .build(new CacheLoader<String, HttpResponse<String>>() { // build the cacheloader
-
                     @Override
                     public HttpResponse<String> load(String userId) throws Exception {
                         return getAuthorization().authorizationGetRoles();
@@ -91,10 +88,8 @@ public class CacheManager {
                         JSONObject json = new JSONObject(resp.getBody());
                         return new UserDTO(json.getJSONObject("user_metadata"));
                     }
-                });
-       
+                });   
     }
-
     /**
      * @return the authorization
      */

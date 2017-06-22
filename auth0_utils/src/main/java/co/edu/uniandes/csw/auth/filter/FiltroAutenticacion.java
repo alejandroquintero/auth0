@@ -30,7 +30,6 @@ public class FiltroAutenticacion implements Filter {
 
     private AuthenticationApi auth;
     
-
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
 

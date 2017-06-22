@@ -39,11 +39,10 @@ public class AuthenticationApi {
     private Properties prop = new Properties();
     private InputStream input = null;
     private String path;
-    private AuthorizationApi authorization;
+   
 
     public AuthenticationApi() throws IOException, UnirestException, JSONException, InterruptedException, ExecutionException {
-        authorization = new AuthorizationApi();
-
+       
         path = this.getClass().getProtectionDomain()
                 .getCodeSource().getLocation().toString()
                 .split("target")[0].substring(6)
@@ -72,8 +71,6 @@ public class AuthenticationApi {
 
     }
 
- 
-    
     public HttpResponse<String> managementGetUser(String id) throws UnirestException, JSONException {
 
         Unirest.setTimeouts(1000, 10000);
@@ -140,14 +137,12 @@ public class AuthenticationApi {
     public String getManagementAccessToken() throws UnirestException, JSONException {
         HttpResponse<String> res = managementToken();
         JSONObject json = new JSONObject(res.getBody());
-         System.out.println(res.getBody());
         return (String) json.get("access_token");
     }
 
     public String getAuthenticationAccessToken(UserDTO dto, HttpServletResponse rsp) throws UnirestException, JSONException {
         HttpResponse<String> res = authenticationToken(dto);
         JSONObject json = new JSONObject(res.getBody());
-         System.out.println(json);
         rsp.addHeader("id_token", json.get("id_token").toString());
         return (String) json.get("access_token");
     }
@@ -167,7 +162,6 @@ public class AuthenticationApi {
     }
 
     public Jws<Claims> decryptToken(String token) {
-        System.out.println(token);
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
         String secret = getProp().getProperty("authenticationSecretKey").trim();
         Key signingKey = new SecretKeySpec(secret.getBytes(), signatureAlgorithm.getJcaName());
@@ -198,7 +192,6 @@ public class AuthenticationApi {
         for (Cookie c : cookie) {
             if ("id_token".equals(c.getName())) {
                 jwt = c.getValue();
-             System.out.println(jwt);
             }
         }
         try {

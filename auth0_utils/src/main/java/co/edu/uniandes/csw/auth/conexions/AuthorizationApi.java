@@ -73,7 +73,6 @@ public class AuthorizationApi {
         Unirest.setTimeouts(1000, 10000);
         return Unirest.get(prop.getProperty("authorizationExtension").trim() + "/groups/" + getGroupID(getGroups()) + "/roles")
                 .header("Authorization", "Bearer " + getAuthorizationAccessToken()).asString();
-
     }
 
     public void authorizationAddUserToGroup(String userId) throws UnirestException, JSONException, InterruptedException, ExecutionException {
@@ -94,7 +93,6 @@ public class AuthorizationApi {
 
     public HttpResponse<String> authorizationGetRoles() throws UnirestException, JSONException, InterruptedException, ExecutionException {
         Unirest.setTimeouts(1000, 10000);
-        System.out.println("getting roles from method");
         return Unirest.get(prop.getProperty("authorizationExtension").trim() + "/roles")
                 .header("Authorization", "Bearer " + getAuthorizationAccessToken()).asString();
     }
@@ -115,13 +113,11 @@ public class AuthorizationApi {
 
     public String getAuthorizationAccessToken() throws UnirestException, JSONException {
         HttpResponse<String> res = authorizationAccessToken();
-        System.out.println(res.getBody());
         return getField(res, "access_token");
     }
 
     public JSONObject getGroups() throws UnirestException, JSONException, InterruptedException, ExecutionException {
         return new JSONObject(authorizationGetGroups().getBody());
-
     }
 
     public String getGroupID(JSONObject jsonObject) throws JSONException {
@@ -136,7 +132,6 @@ public class AuthorizationApi {
     }
 
     public List<String> getRoles(JSONObject json) throws JSONException {
-
         String[] roles = json.getJSONObject("app_metadata")
                 .getJSONObject("authorization").get("roles").toString().replaceAll("\"", "").replace("[", "").replace("]", "").split(",");
         return Collections.arrayToList(roles);
@@ -153,8 +148,7 @@ public class AuthorizationApi {
 
     public List<String> getSignUpRolesId(UserDTO user, HttpResponse<String> rsp) throws UnirestException, JSONException, InterruptedException, ExecutionException {
         Iterator<String> it = user.getRoles().iterator();
-        List<String> list = new ArrayList<>();
-        
+        List<String> list = new ArrayList<>();   
         String roles = rsp.getBody();
         while (it.hasNext()) {
             list.add(getRoleByName(it.next(), roles));
@@ -191,11 +185,9 @@ public class AuthorizationApi {
 
     public List<String> getPermissionsPerRole(List<String> list) throws UnirestException, JSONException, InterruptedException, ExecutionException {
       
-        JSONObject json = new JSONObject(authorizationGetRoles().getBody());
-        
+        JSONObject json = new JSONObject(authorizationGetRoles().getBody()); 
         JSONArray jarray = json.getJSONArray("roles");
         List<String> plist = new ArrayList<>();
-       
         for (int i = 0; i < jarray.length(); i++) {
             if (list.contains(jarray.getJSONObject(i).get("_id"))) {
                 for (int j = 0; j < jarray.getJSONObject(i).getJSONArray("permissions").length(); j++) {
@@ -203,8 +195,6 @@ public class AuthorizationApi {
                 }
             }
         }
-       
         return plist;
     }
-
 }

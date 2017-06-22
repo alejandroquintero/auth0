@@ -12,24 +12,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
-
-import java.lang.Class;
-import java.lang.Object;
-import java.util.concurrent.TimeUnit;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-
-
 /**
  *
  * @author Asistente
  */
 public class PropertiesLoader {
     
-  private Properties prop;
-  private InputStream input;
-  private  String file;
+  private final Properties prop;
+  private final InputStream input;
+  private final  String file;
   
   public PropertiesLoader() throws FileNotFoundException, IOException{
   //resolve a cache manager
