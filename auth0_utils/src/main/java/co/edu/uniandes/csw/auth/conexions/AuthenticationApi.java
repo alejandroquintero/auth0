@@ -38,16 +38,12 @@ public class AuthenticationApi {
 
     private Properties prop = new Properties();
     private InputStream input = null;
-    private String path;
+    private static final String path = System.getenv("AUTH0_PROPERTIES");
    
 
     public AuthenticationApi() throws IOException, UnirestException, JSONException, InterruptedException, ExecutionException {
        
-        path = this.getClass().getProtectionDomain()
-                .getCodeSource().getLocation().toString()
-                .split("target")[0].substring(6)
-                .concat("src/main/java/co/edu/uniandes/csw"
-                        + "/auth/properties/auth0.properties");
+        
         try {
             input = new FileInputStream(path);
             try {

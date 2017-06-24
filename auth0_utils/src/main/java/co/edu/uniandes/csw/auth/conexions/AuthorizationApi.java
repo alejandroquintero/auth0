@@ -29,15 +29,11 @@ public class AuthorizationApi {
 
     private Properties prop = new Properties();
     private InputStream input = null;
-    private String path;
+    private static final String path = System.getenv("AUTH0_PROPERTIES");
 
     public AuthorizationApi() throws IOException, UnirestException, JSONException {
 
-        path = this.getClass().getProtectionDomain()
-                .getCodeSource().getLocation().toString()
-                .split("target")[0].substring(6)
-                .concat("src/main/java/co/edu/uniandes/csw"
-                        + "/auth/properties/auth0.properties");
+        
         try {
             input = new FileInputStream(path);
             try {

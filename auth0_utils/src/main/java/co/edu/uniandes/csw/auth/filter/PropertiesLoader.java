@@ -20,17 +20,13 @@ public class PropertiesLoader {
     
   private final Properties prop;
   private final InputStream input;
-  private final  String file;
+ private static final String file = System.getenv("AUTH0_PROPERTIES");
   
   public PropertiesLoader() throws FileNotFoundException, IOException{
   //resolve a cache manager
  
   prop=new Properties();
-  file=this.getClass().getProtectionDomain()
-             .getCodeSource().getLocation().toString()
-             .split("target")[0].substring(6)
-             .concat("src/main/java/co/edu/uniandes/csw"
-                     + "/auth/properties/auth0.properties");
+  
   input = new FileInputStream(file);
   prop.load(input);
   }
