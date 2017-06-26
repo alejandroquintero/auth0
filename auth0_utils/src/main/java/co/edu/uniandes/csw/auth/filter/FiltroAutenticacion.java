@@ -29,6 +29,18 @@ import org.json.JSONException;
 public class FiltroAutenticacion implements Filter {
 
     private AuthenticationApi auth;
+    private static int cacheCount;
+   static{try {
+       
+       if(cacheCount==0){
+           System.out.println("Inicializando cache.....");
+      cacheCount = CacheManager.cacheInit();
+       }
+        } catch (UnirestException | JSONException | InterruptedException | ExecutionException ex) {
+            Logger.getLogger(FiltroAutenticacion.class.getName()).log(Level.SEVERE, null, ex);
+        }
+   }
+
     
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -38,8 +50,7 @@ public class FiltroAutenticacion implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         try {
-            this.auth = new AuthenticationApi();
-           
+            this.auth = new AuthenticationApi(); 
         } catch (UnirestException | JSONException | InterruptedException | ExecutionException ex) {
             Logger.getLogger(FiltroAutenticacion.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -52,6 +63,7 @@ public class FiltroAutenticacion implements Filter {
         path = String.join("/", Arrays.copyOfRange(path.split("/"), 0, 3)).trim();
         resource = path.split("/")[2];
         boolean allowedPath = prop.containsKey(path);
+        
         Cookie[] cookie = ((HttpServletRequest) request).getCookies();
         if(cookie != null){
         for (Cookie c : cookie) {

@@ -34,11 +34,12 @@ public class CacheManager {
     private static LoadingCache<String, HttpResponse<String>> rolesCache;
     private static LoadingCache<String, UserDTO> profileCache;
     
+   
 
     static {
         try {
             authorization = new AuthorizationApi();
-        } catch (IOException | UnirestException | JSONException ex) {
+        } catch (IOException | UnirestException | JSONException | InterruptedException | ExecutionException ex) {
             Logger.getLogger(CacheManager.class.getName()).log(Level.SEVERE, null, ex);
         }
         try {
@@ -89,6 +90,24 @@ public class CacheManager {
                         return new UserDTO(json.getJSONObject("user_metadata"));
                     }
                 });   
+        
+    }
+   
+    
+     public static int cacheInit() throws UnirestException, JSONException, InterruptedException, ExecutionException{
+     getRolesCache().get("roles");
+     JSONArray jarray =  getAuthorization().getGroups().getJSONArray("groups").getJSONObject(0).getJSONArray("members");
+      int k=0;
+     for(;k<jarray.length();k++){
+         Logger.getAnonymousLogger().info("cargando perfil para usuario con id ".concat(jarray.get(k).toString()));
+           getProfileCache().get(jarray.get(k).toString());
+           Logger.getAnonymousLogger().info("cargando roles para usuario con id  ".concat(jarray.get(k).toString()));
+           getRolesByUserCache().get(jarray.get(k).toString());
+           Logger.getAnonymousLogger().info("cargando permisos para usuario con id  ".concat(jarray.get(k).toString()));
+           getPermissionsCache().get(jarray.get(k).toString());
+     
+       }
+       return k;
     }
     /**
      * @return the authorization
@@ -132,5 +151,8 @@ public class CacheManager {
         return profileCache;
     }
 
+    /**
+     * @return the isInitialized
+     */
    
 }

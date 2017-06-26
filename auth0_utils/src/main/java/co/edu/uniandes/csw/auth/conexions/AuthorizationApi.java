@@ -31,7 +31,7 @@ public class AuthorizationApi {
     private InputStream input = null;
     private static final String path = System.getenv("AUTH0_PROPERTIES");
 
-    public AuthorizationApi() throws IOException, UnirestException, JSONException {
+    public AuthorizationApi() throws IOException, UnirestException, JSONException, InterruptedException, ExecutionException {
 
         
         try {
@@ -44,6 +44,8 @@ public class AuthorizationApi {
         } catch (FileNotFoundException ex) {
             Logger.getLogger(AuthenticationApi.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+       
 
     }
 
@@ -193,4 +195,5 @@ public class AuthorizationApi {
         }
         return plist;
     }
+   
 }
