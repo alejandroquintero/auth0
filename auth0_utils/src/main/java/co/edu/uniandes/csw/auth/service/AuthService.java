@@ -120,7 +120,7 @@ public class AuthService {
         
         
         Jws<Claims> claim = null;
-        if (logged) {
+        if (logged & req.getCookies()!=null) {
             claim = auth.decryptToken(req);
         }
         String subject;
