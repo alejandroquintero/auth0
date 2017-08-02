@@ -36,7 +36,7 @@ public class FiltroAutenticacion implements Filter {
            System.out.println("Inicializando cache.....");
       cacheCount = CacheManager.cacheInit();
        }
-        } catch (UnirestException | JSONException | InterruptedException | ExecutionException ex) {
+        } catch (UnirestException | JSONException | InterruptedException | ExecutionException | IOException ex) {
             Logger.getLogger(FiltroAutenticacion.class.getName()).log(Level.SEVERE, null, ex);
         }
    }

@@ -19,6 +19,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Key;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -39,11 +42,9 @@ public class AuthenticationApi {
     private Properties prop = new Properties();
     private InputStream input = null;
     private static final String path = System.getenv("AUTH0_PROPERTIES");
-   
 
     public AuthenticationApi() throws IOException, UnirestException, JSONException, InterruptedException, ExecutionException {
-       
-        
+
         try {
             input = new FileInputStream(path);
             try {
@@ -83,14 +84,14 @@ public class AuthenticationApi {
                 .body("{\"grant_types\":[\"password\"]}")
                 .asString();
     }
- 
-    public  HttpResponse<String> managementGetClientGrants(String clientId) throws UnirestException, JSONException{
-    return Unirest.get(getProp().getProperty("managementAudience").trim() + "clients/" + getProp().getProperty(clientId).trim())
-            .header("content-type", "application/json")
-            .header("Authorization", "Bearer " + getManagementAccessToken()).asString();
-  
+
+    public HttpResponse<String> managementGetClientGrants(String clientId) throws UnirestException, JSONException {
+        return Unirest.get(getProp().getProperty("managementAudience").trim() + "clients/" + getProp().getProperty(clientId).trim())
+                .header("content-type", "application/json")
+                .header("Authorization", "Bearer " + getManagementAccessToken()).asString();
+
     }
-    
+
     public HttpResponse<String> authenticationToken(UserDTO dto) throws UnirestException {
         Unirest.setTimeouts(1000, 10000);
         return Unirest.post(getProp().getProperty("accessToken").trim())
@@ -162,10 +163,10 @@ public class AuthenticationApi {
         String secret = getProp().getProperty("authenticationSecretKey").trim();
         Key signingKey = new SecretKeySpec(secret.getBytes(), signatureAlgorithm.getJcaName());
         Jws<Claims> j;
-        
+
         try {
             if (token != null) {
-                
+
                 j = Jwts.parser().setSigningKey(signingKey).parseClaimsJws(token);
             } else {
                 throw new SignatureException("no autenticado");
@@ -214,5 +215,28 @@ public class AuthenticationApi {
      */
     public void setProp(Properties prop) {
         this.prop = prop;
+    }
+
+    public static List<String> devPermissions() throws IOException, UnirestException, JSONException, InterruptedException, ExecutionException {
+        JSONObject js = new JSONObject(new AuthenticationApi().getProp());
+        if ("development".equals(js.get("environment").toString().trim())) {
+            Iterator it = js.keys();
+            List<String> permissions = new ArrayList<>();
+            while (it.hasNext()) {
+                String g = (String) it.next();
+                if (g.contains("/api/")) {
+                    if (!"users".equals(g.split("/")[2])) {
+                        permissions.add("read:".concat(g.split("/")[2]));
+                        permissions.add("create:".concat(g.split("/")[2]));
+                        permissions.add("update:".concat(g.split("/")[2]));
+                        permissions.add("delete:".concat(g.split("/")[2]));
+                    }
+
+                }
+            }
+            return permissions;
+        } else {
+            return null;
+        }
     }
 }

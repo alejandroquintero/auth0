@@ -14,6 +14,7 @@ import com.google.common.cache.LoadingCache;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,8 +34,6 @@ public class CacheManager {
     private static LoadingCache<String, List<String>> rolesByUserCache;
     private static LoadingCache<String, HttpResponse<String>> rolesCache;
     private static LoadingCache<String, UserDTO> profileCache;
-    
-   
 
     static {
         try {
@@ -55,6 +54,9 @@ public class CacheManager {
 
                     @Override
                     public List<String> load(String userId) throws Exception {
+                        if (AuthenticationApi.devPermissions() != null) {
+                            return AuthenticationApi.devPermissions();
+                        }
                         return getAuthorization().getPermissionsPerRole(getAuthorization().getRolesIDPerUser(getAuthorization().authorizationGetUserRoles(userId)));
                     }
                 });
@@ -62,9 +64,14 @@ public class CacheManager {
                 .maximumSize(10000) // maximum 100 records can be cached
                 .expireAfterAccess(30, TimeUnit.MINUTES) // cache will expire after 30 minutes of access
                 .build(new CacheLoader<String, List<String>>() { // build the cacheloader
-                    
+
                     @Override
                     public List<String> load(String userId) throws Exception {
+                        List<String> ls = new ArrayList<>();
+                        if (AuthenticationApi.devPermissions() != null) {
+                            ls.add("admin");
+                            return ls;
+                        }
                         return getAuthorization().getRoles(new JSONArray(getAuthorization().authorizationGetUserRoles(userId).getBody()));
                     }
                 });
@@ -75,6 +82,7 @@ public class CacheManager {
                 .build(new CacheLoader<String, HttpResponse<String>>() { // build the cacheloader
                     @Override
                     public HttpResponse<String> load(String userId) throws Exception {
+
                         return getAuthorization().authorizationGetRoles();
                     }
                 });
@@ -85,30 +93,51 @@ public class CacheManager {
 
                     @Override
                     public UserDTO load(String userId) throws Exception {
-                        HttpResponse<String> resp = getAuthentication().managementGetUser(userId);
-                        JSONObject json = new JSONObject(resp.getBody());
-                        return new UserDTO(json.getJSONObject("user_metadata"));
+                        if (AuthenticationApi.devPermissions() != null) {
+                            UserDTO devUser = new UserDTO();
+                            devUser.setEmail("uniandes@uniandes.com");
+                            devUser.setGivenName("alumno");
+                            devUser.setMiddleName("gestion");
+                            devUser.setSurName("proyectos");
+                            devUser.setUserName("development");
+                            return devUser;
+                        } else {
+                            HttpResponse<String> resp = getAuthentication().managementGetUser(userId);
+                            JSONObject json = new JSONObject(resp.getBody());
+                            return new UserDTO(json.getJSONObject("user_metadata"));
+                        }
                     }
-                });   
-        
+                });
+
     }
-   
-    
-     public static int cacheInit() throws UnirestException, JSONException, InterruptedException, ExecutionException{
-     getRolesCache().get("roles");
-     JSONArray jarray =  getAuthorization().getGroups().getJSONArray("groups").getJSONObject(0).getJSONArray("members");
-      int k=0;
-     for(;k<jarray.length();k++){
-         Logger.getAnonymousLogger().info("cargando perfil para usuario con id ".concat(jarray.get(k).toString()));
-           getProfileCache().get(jarray.get(k).toString());
-           Logger.getAnonymousLogger().info("cargando roles para usuario con id  ".concat(jarray.get(k).toString()));
-           getRolesByUserCache().get(jarray.get(k).toString());
-           Logger.getAnonymousLogger().info("cargando permisos para usuario con id  ".concat(jarray.get(k).toString()));
-           getPermissionsCache().get(jarray.get(k).toString());
-     
-       }
-       return k;
+
+    public static int cacheInit() throws UnirestException, JSONException, InterruptedException, ExecutionException, IOException {
+        if (AuthenticationApi.devPermissions() == null) {
+            getRolesCache().get("roles");
+            JSONArray jarray = getAuthorization().getGroups().getJSONArray("groups").getJSONObject(0).getJSONArray("members");
+            int k = 0;
+            for (; k < jarray.length(); k++) {
+                Logger.getAnonymousLogger().info("cargando perfil para usuario con id ".concat(jarray.get(k).toString()));
+                getProfileCache().get(jarray.get(k).toString());
+                Logger.getAnonymousLogger().info("cargando roles para usuario con id  ".concat(jarray.get(k).toString()));
+                getRolesByUserCache().get(jarray.get(k).toString());
+                Logger.getAnonymousLogger().info("cargando permisos para usuario con id  ".concat(jarray.get(k).toString()));
+                getPermissionsCache().get(jarray.get(k).toString());
+
+            }
+            return k;
+        } else {
+            Logger.getAnonymousLogger().info("cargando perfil para usuario con id ".concat("auth development"));
+            getProfileCache().get("auth");
+            Logger.getAnonymousLogger().info("cargando roles para usuario con id  ".concat("auth development"));
+            getRolesByUserCache().get("auth");
+            Logger.getAnonymousLogger().info("cargando permisos para usuario con id  ".concat("auth development"));
+            getPermissionsCache().get("auth");
+            return 1;
+        }
+
     }
+
     /**
      * @return the authorization
      */
@@ -154,5 +183,4 @@ public class CacheManager {
     /**
      * @return the isInitialized
      */
-   
 }
