@@ -65,6 +65,9 @@ public class FiltroAutenticacion implements Filter {
         boolean allowedPath = prop.containsKey(path);
         
         Cookie[] cookie = ((HttpServletRequest) request).getCookies();
+        if("development".equals(prop.getPropertyAsString("environment"))){
+            chain.doFilter(request, response);
+        }
         if(cookie != null){
         for (Cookie c : cookie) {
             if ("id_token".equals(c.getName())) {

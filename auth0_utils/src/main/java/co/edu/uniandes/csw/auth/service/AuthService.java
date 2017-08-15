@@ -49,10 +49,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.json.JsonArray;
-import org.json.JSONArray;
+
 
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -68,11 +65,11 @@ public class AuthService {
     private final AuthenticationApi auth;
     private final AuthorizationApi authorization;
     private static boolean logged = false;
-   
     
     public AuthService() throws IOException, UnirestException, JSONException, InterruptedException, ExecutionException {
         this.auth = new AuthenticationApi();
         this.authorization = new AuthorizationApi();
+        
      
     }
 
@@ -125,14 +122,19 @@ public class AuthService {
         }
         String subject;
         if (claim != null) {
-            subject = claim.getBody().getSubject();
-            
+            subject = claim.getBody().getSubject();           
             UserDTO user = CacheManager.getProfileCache().get(subject);
             user.setRoles(CacheManager.getRolesByUserCache().get(subject));
             user.setPermissions(CacheManager.getPermissionsCache().get(subject));
-
             return user;
         }
+        if("development".equals(this.auth.getProp().getProperty("environment"))){
+        UserDTO user = CacheManager.getProfileCache().get("auth");
+            user.setRoles(CacheManager.getRolesByUserCache().get("auth"));
+            user.setPermissions(CacheManager.getPermissionsCache().get("auth"));
+            return user;
+        }
+            
         return null;
     }
 
